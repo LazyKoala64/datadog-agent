@@ -1,0 +1,5 @@
+---
+install_method:
+  tool: windows_msi
+  tool_version: windows_msi-unknown
+  installer_version: msi_package

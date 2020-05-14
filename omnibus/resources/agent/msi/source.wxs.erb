@@ -401,7 +401,15 @@
             Name="datadog.yaml"
             Source="$(var.EtcFiles)\datadog.yaml.example"/>
       </Component>
-      
+
+      <Component Id="install_info"
+                 Guid="4702D1C5-54C0-439B-9423-7E2226B71E4B"
+                 NeverOverwrite="yes"
+                 Permanent="yes">
+        <File Id="install_info"
+            Name="install_info"
+            Source="Resources\assets\install_info"/>
+      </Component>
 
       <Directory Id="checks.d" Name="checks.d">
         <Component Id="checks.d"
