@@ -143,12 +143,13 @@ func CheckAndUpgradeConfig() error {
 func SetInstallInfo() error {
 
 	// install info data type for marshalling
+	type Method struct {
+		Tool             string `yaml:"tool"`
+		ToolVersion      string `yaml:"tool_version"`
+		InstallerVersion string `yaml:"installer_version"`
+	}
 	type installInfo struct {
-		Method struct {
-			Tool             string `yaml:"tool"`
-			ToolVersion      string `yaml:"tool_version"`
-			InstallerVersion string `yaml:"installer_version"`
-		} `yaml:"install_method"`
+		Method Method `yaml:"install_method"`
 	}
 
 	dataDir, err := winutil.GetProgramDataDir()
@@ -161,14 +162,10 @@ func SetInstallInfo() error {
 	_, err = os.Stat(installInfoPath)
 	if os.IsNotExist(err) {
 		info := installInfo{
-			Method: struct {
-				Tool             string `yaml:"tool"`
-				ToolVersion      string `yaml:"tool_version"`
-				InstallerVersion string `yaml:"installer_version"`
-			}{
-				"windows_msi",
-				"windows_msi-unknown",
-				"msi_package",
+			Method: Method{
+				Tool:             "windows_msi",
+				ToolVersion:      "windows_msi-unknown",
+				InstallerVersion: "msi_package",
 			},
 		}
 
@@ -180,7 +177,7 @@ func SetInstallInfo() error {
 			return fmt.Errorf("unable to open registry config %s", err.Error())
 		}
 		defer k.Close()
-		if val, _, err = k.GetStringValue("msiexec_version"); err == nil && val != "" {
+		if val, _, err := k.GetStringValue("msiexec_version"); err == nil && val != "" {
 			info.Method.ToolVersion = fmt.Sprintf("windows_msi-%s", val)
 		} else if err != nil {
 			return fmt.Errorf("msiexec version not found: %s", err.Error())
