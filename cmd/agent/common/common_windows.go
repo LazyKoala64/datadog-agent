@@ -138,8 +138,8 @@ func CheckAndUpgradeConfig() error {
 	return ImportConfig(DefaultConfPath, DefaultConfPath, false)
 }
 
-/// SetInstallInfo imports installation information from Windows registry into
-/// the install_info file. It leaves the file untouched if it already exists
+// SetInstallInfo imports installation information from Windows registry into
+// the install_info file. It leaves the file untouched if it already exists
 func SetInstallInfo() error {
 
 	// install info data type for marshalling
