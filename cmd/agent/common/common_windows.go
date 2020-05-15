@@ -152,6 +152,7 @@ func SetInstallInfo() error {
 		Method Method `yaml:"install_method"`
 	}
 
+	// get install_info path
 	dataDir, err := winutil.GetProgramDataDir()
 	if err != nil {
 		return err
@@ -177,7 +178,9 @@ func SetInstallInfo() error {
 			return fmt.Errorf("unable to open registry config %s", err.Error())
 		}
 		defer k.Close()
-		if val, _, err := k.GetStringValue("msiexec_version"); err == nil && val != "" {
+
+		val, _, err := k.GetStringValue("msiexec_version")
+		if err == nil && val != "" {
 			info.Method.ToolVersion = fmt.Sprintf("windows_msi-%s", val)
 		} else if err != nil {
 			return fmt.Errorf("msiexec version not found: %s", err.Error())
@@ -194,6 +197,7 @@ func SetInstallInfo() error {
 		}
 		return nil
 	} else if err != nil {
+		// stat failed for a reason other than nonexistence
 		return fmt.Errorf("unable to stat %s: %s", installInfoPath, err)
 	}
 
