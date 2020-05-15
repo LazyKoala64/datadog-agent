@@ -57,6 +57,9 @@ func (m *myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes c
 	const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown
 	changes <- svc.Status{State: svc.StartPending}
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
+	if err := common.SetInstallInfo(); err != nil {
+		elog.Warning(0x80000001, err.Error())
+	}
 	if err := common.ImportRegistryConfig(); err != nil {
 		elog.Warning(0x80000001, err.Error())
 		// continue running agent with existing config

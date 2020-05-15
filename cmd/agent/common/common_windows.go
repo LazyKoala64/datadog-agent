@@ -138,6 +138,63 @@ func CheckAndUpgradeConfig() error {
 	return ImportConfig(DefaultConfPath, DefaultConfPath, false)
 }
 
+/// SetInstallInfo imports installation information from Windows registry into
+/// the install_info file. It leaves the file untouched if it already exists
+func SetInstallInfo() error {
+
+	// install info data type for marshalling
+	type installInfo struct {
+		Method struct {
+			Tool             string `yaml:"tool"`
+			ToolVersion      string `yaml:"tool_version"`
+			InstallerVersion string `yaml:"installer_version"`
+		} `yaml:"install_method"`
+	}
+
+	dataDir, err := winutil.GetProgramDataDir()
+	if err != nil {
+		return err
+	}
+	installInfoPath := filePath.Join(dataDir, "install_info")
+
+	// set install_info file if it does not already exist
+	_, err := os.Stat(installInfoPath)
+	if os.IsNotExist(err) {
+		info := installInfo{
+			Tool:             "windows_msi",
+			ToolVersion:      "windows_msi-unknown",
+			InstallerVersion: "msi_package",
+		}
+
+		// Get msiexec version if possible
+		k, err := registry.OpenKey(registry.LOCAL_MACHINE,
+			"SOFTWARE\\Datadog\\Datadog Agent",
+			registry.ALL_ACCESS)
+		if err != nil {
+			return fmt.Errorf("unable to open registry config %s", err.Error())
+		}
+		defer k.Close()
+		if val, _, err = k.GetStringValue("msiexec_version"); err == nil && val != "" {
+			info.ToolVersion = fmt.Sprintf("windows_msi-%s", val)
+		} else if err != nil {
+			return fmt.Errorf("msiexec version not found: %s", err.Error())
+		}
+
+		// Save data into install_info file
+		infoBytes, err := yaml.Marshall(&info)
+		if err != nil {
+			return fmt.Errof("unable to marshall install info: %s", err)
+		}
+		err := ioutil.WriteFile(installInfoPath, infoBytes, os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("unable to write to %s: %s", installInfoPath, err)
+		}
+		return nil
+	}
+
+	return fmt.Errorf("unable to stat %s: %s", installInfoPath, err)
+}
+
 // ImportRegistryConfig imports settings from Windows registry into datadog.yaml
 func ImportRegistryConfig() error {
 
