@@ -155,15 +155,21 @@ func SetInstallInfo() error {
 	if err != nil {
 		return err
 	}
-	installInfoPath := filePath.Join(dataDir, "install_info")
+	installInfoPath := filepath.Join(dataDir, "install_info")
 
 	// set install_info file if it does not already exist
-	_, err := os.Stat(installInfoPath)
+	_, err = os.Stat(installInfoPath)
 	if os.IsNotExist(err) {
 		info := installInfo{
-			Tool:             "windows_msi",
-			ToolVersion:      "windows_msi-unknown",
-			InstallerVersion: "msi_package",
+			Method: struct {
+				Tool             string `yaml:"tool"`
+				ToolVersion      string `yaml:"tool_version"`
+				InstallerVersion string `yaml:"installer_version"`
+			}{
+				"windows_msi",
+				"windows_msi-unknown",
+				"msi_package",
+			},
 		}
 
 		// Get msiexec version if possible
@@ -175,7 +181,7 @@ func SetInstallInfo() error {
 		}
 		defer k.Close()
 		if val, _, err = k.GetStringValue("msiexec_version"); err == nil && val != "" {
-			info.ToolVersion = fmt.Sprintf("windows_msi-%s", val)
+			info.Method.ToolVersion = fmt.Sprintf("windows_msi-%s", val)
 		} else if err != nil {
 			return fmt.Errorf("msiexec version not found: %s", err.Error())
 		}
@@ -185,7 +191,7 @@ func SetInstallInfo() error {
 		if err != nil {
 			return fmt.Errof("unable to marshall install info: %s", err)
 		}
-		err := ioutil.WriteFile(installInfoPath, infoBytes, os.ModePerm)
+		err = ioutil.WriteFile(installInfoPath, infoBytes, os.ModePerm)
 		if err != nil {
 			return fmt.Errorf("unable to write to %s: %s", installInfoPath, err)
 		}
