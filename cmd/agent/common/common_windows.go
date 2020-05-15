@@ -190,9 +190,11 @@ func SetInstallInfo() error {
 			return fmt.Errorf("unable to write to %s: %s", installInfoPath, err)
 		}
 		return nil
+	} else if err != nil {
+		return fmt.Errorf("unable to stat %s: %s", installInfoPath, err)
 	}
 
-	return fmt.Errorf("unable to stat %s: %s", installInfoPath, err)
+	return nil
 }
 
 // ImportRegistryConfig imports settings from Windows registry into datadog.yaml
