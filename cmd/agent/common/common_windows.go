@@ -189,7 +189,7 @@ func SetInstallInfo() error {
 		// Save data into install_info file
 		infoBytes, err := yaml.Marshal(&info)
 		if err != nil {
-			return fmt.Errof("unable to marshall install info: %s", err)
+			return fmt.Errorf("unable to marshall install info: %s", err)
 		}
 		err = ioutil.WriteFile(installInfoPath, infoBytes, os.ModePerm)
 		if err != nil {
